@@ -1,0 +1,63 @@
+## 实例运行数量
+replicaCount: 1
+
+## service 相关设置
+service:
+  # 是否启用 service 暴露本服务
+  enabled: true  
+  # Service 类型
+  type: NodePort
+  # 指定 service 的 clusterIP
+  clusterIP: ~
+  # 端口设置
+  ports:
+    # 服务端口
+    http:
+      port: 8080
+      nodePort: 32153
+  annotations: {}
+
+## 设置默认的 image、imageTag 和 imagePullPolicy。
+image:
+  repository: nginx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+## Deployment 更新策略
+deploymentUpdate:
+  type: RollingUpdate
+  maxUnavailable: 0
+  maxSurge: 100%
+
+## Pod 优先级设置
+priorityClassName: ""
+
+## Pod 节点分配
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+## 给 Pod 附加的 annotations
+podAnnotations: {}
+
+## ## Pod 附加的 labels
+podLabels: {}
+
+## 实例运行时的环境变量
+env:
+  open:
+    # 网关地址
+    API_HOST: http://gateway.example.com
+    # websocket地址
+    WEBSOCKET_SERVER: ws://ws.example.com
+    # 文件服务地址
+    FILE_SERVER: http://minio.example.com
+  
+## 资源请求和限制相关配置
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    memory: 128Mi
+
+

@@ -1,0 +1,130 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    java-app: blank-demo
+  name: blank-demo
+spec:
+  minReadySeconds: 10
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      java-app: blank-demo
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        java-app: blank-demo
+    spec:
+      containers:
+      - args:
+        - -jar
+        - -Xms4096m
+        - -Xmx4096m
+        - -Xmn258m
+        - -Xss256k
+        - -Duser.timezone=GMT+08
+        - -XX:+DisableExplicitGC
+        - -XX:+UseConcMarkSweepGC
+        - -XX:+UseParNewGC
+        - -XX:+CMSParallelRemarkEnabled
+        - -XX:+CMSClassUnloadingEnabled
+        - -XX:LargePageSizeInBytes=128m
+        - -XX:+UseFastAccessorMethods
+        - -XX:+UseCMSInitiatingOccupancyOnly
+        - -XX:CMSInitiatingOccupancyFraction=80
+        - -XX:SoftRefLRUPolicyMSPerMB=0
+        - -XX:+PrintClassHistogram
+        - -Dfile.encoding=UTF8
+        - -Dsun.jnu.encoding=UTF8
+        - app.jar
+        - --spring.profiles.active=prod
+        - --spring.cloud.nacos.config.server-addr=xxxx
+        - --spring_cloud_nacos_config_namespace=xxxx
+        command:
+        - java
+        env:
+        - name: PATH
+          value: /usr/local/maven/bin:/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        image: xxx:xxx
+        imagePullPolicy: Always
+        readinessProbe:
+          failureThreshold: 2
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: cjb-bms
+        resources:
+         requests:
+           cpu: 1
+           memory: 1024Mi
+         limits:
+           cpu: 2
+           memory: 4096Mi
+        securityContext:
+          privileged: false
+        volumeMounts:
+        - mountPath: /etc/localtime
+          name: time
+          readOnly: true
+        workingDir: /
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext: {}
+      serviceAccountName: ""
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /etc/localtime
+        name: time
+status: {}
+
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: blank-demo
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: blank-demo
+  minReplicas: 2
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 95
+
+
+
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blank-demo
+  labels:
+    app: blank-demo
+spec:
+  type: NodePort
+  ports:
+  - name: blank-demo
+    port: 8080
+    targetPort: 8080
+    nodePort: 32001 
+  selector:
+    java-app: blank-demo

@@ -1,0 +1,114 @@
+# Default values for register-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+#启动POD容器的个数
+replicaCount: 2
+
+#服务的http端口，以及宿主机端口
+#port是项目自己的http端口
+#nodeport：是映射在宿主机的端口
+service:
+  # 是否启用 service 暴露本服务
+  enabled: true
+  # Service 类型
+  type: NodePort
+  # 指定 service 的 clusterIP
+  clusterIP: ~
+   # 端口设置
+  ports:
+    # 服务端口
+    http:
+      port: 8080
+      targetport: 8080
+      nodePort: 32001
+## 实例运行时的环境变量
+env:
+  # nacos配置信息
+  spring_cloud_nacos_config_server_addr: xxx
+  spring_cloud_nacos_config_namespace: xxx
+  #springboot 启用profiles配置文件  #环境变量参数可传 dev、test、release、prod
+  spring_profiles_active: prod
+
+  ## SPRING_OPTS 配置参数
+  SPRING_OPTS: >-
+    -Dserver.port=8080
+
+  ## JAVA_OPTS 配置参数
+  JAVA_OPTS: >-
+    -Xms4096m
+    -Xmx4096m
+    -Xmn256m
+    -Xss256k
+    -Duser.timezone=GMT+08
+    -XX:+DisableExplicitGC
+    -XX:+UseConcMarkSweepGC
+    -XX:+UseParNewGC
+    -XX:+CMSParallelRemarkEnabled
+    -XX:+CMSClassUnloadingEnabled
+    -XX:LargePageSizeInBytes=128m
+    -XX:+UseFastAccessorMethods
+    -XX:+UseCMSInitiatingOccupancyOnly
+    -XX:CMSInitiatingOccupancyFraction=80
+    -XX:SoftRefLRUPolicyMSPerMB=0
+    -XX:+PrintClassHistogram
+    -Dfile.encoding=UTF8
+    -Dsun.jnu.encoding=UTF8
+
+## Deployment 更新策略
+deploymentUpdate:
+  type: RollingUpdate
+  maxUnavailable: 1
+  maxSurge: 1
+
+
+## Liveness 和 Readiness 探针相关配置
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 2
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+
+## Pod 节点分配
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+## 给 Pod 附加的 annotations
+podAnnotations: {}
+
+## ## Pod 附加的 labels
+podLabels: {}
+
+#limits是最大限制，requests是最小请求.
+resources:
+  limits:
+    cpu: 2
+    memory: 4Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
+
+
+#镜像地址
+image:
+  repository: xxx
+  tag: xxx
+  pullPolicy: Always
+
+
+
+
+
+
+
+
+
+
